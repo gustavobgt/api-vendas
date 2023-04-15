@@ -4,6 +4,12 @@ import { verify } from 'jsonwebtoken';
 import AppError from '@shared/errors/AppError';
 import authConfig from '@config/auth';
 
+interface TokenPayload {
+  iat: number;
+  exp: number;
+  sub: string;
+}
+
 const isAuthenticated = (
   request: Request,
   _: Response,
@@ -20,7 +26,13 @@ const isAuthenticated = (
   const { secret } = authConfig.jwt;
 
   try {
-    verify(token, secret);
+    const decodedToken = verify(token, secret);
+
+    const { sub } = decodedToken as TokenPayload;
+
+    request.user = {
+      id: sub,
+    };
 
     return next();
   } catch (error) {
