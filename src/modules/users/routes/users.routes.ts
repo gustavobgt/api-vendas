@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import UsersController from '../controllers/UsersController';
-import SessionsController from '../controllers/SessionsController';
 import { Segments, celebrate, Joi } from 'celebrate';
+
+import UsersController from '../controllers/UsersController';
+import isAuthenticated from '../middlewares/isAuthenticated';
 
 const usersRouter = Router();
 const usersController = new UsersController();
-const sessionsController = new SessionsController();
 
-usersRouter.get('/', usersController.index);
+usersRouter.get('/', isAuthenticated, usersController.index);
 
 usersRouter.post(
   '/',
@@ -19,17 +19,6 @@ usersRouter.post(
     },
   }),
   usersController.create,
-);
-
-usersRouter.post(
-  '/sessions',
-  celebrate({
-    [Segments.BODY]: {
-      email: Joi.string().email().required(),
-      password: Joi.string().required(),
-    },
-  }),
-  sessionsController.create,
 );
 
 export default usersRouter;
